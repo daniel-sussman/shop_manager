@@ -67,3 +67,17 @@ def test_delete_record(db_connection):
         Item(4, 'Eraser', .85, 22),
         Item(5, 'Marker', 4.95, 40),
     ]
+
+def test_update_item_quantity(db_connection):
+    db_connection.seed("seeds/shop_manager.sql")
+    repository = ItemRepository(db_connection)
+    repository.update_quantity_stocked(5, 50)
+    
+    result = repository.all()
+    assert result == [
+        Item(1, 'Pencil', .35, 43),
+        Item(2, 'Pen', 2.45, 33),
+        Item(3, 'Paper', .03, 177),
+        Item(4, 'Eraser', .85, 22),
+        Item(5, 'Marker', 4.95, 50),
+    ]

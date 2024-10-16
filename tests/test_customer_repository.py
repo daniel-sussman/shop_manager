@@ -83,8 +83,8 @@ def test_find_customer_orders(db_connection):
     db_connection.seed("seeds/shop_manager.sql")
     repository = CustomerRepository(db_connection)
 
-    result = repository.find_customer_orders(1)
+    result = repository.get_receipts(1)
     assert result == [
-        Receipt(order_id=1, customer_id=1, item_id=1, item_name='Pencil', item_quantity=3, unit_price=.35, placed_on=date(2024, 10, 11)),
-        Receipt(order_id=2, customer_id=1, item_id=2, item_name='Pen', item_quantity=2, unit_price=2.45, placed_on=date(2024, 10, 11))
+        Receipt(order_id=1, customer_id=1, customer_name='Daniel', item_id=1, item_name='Pencil', item_quantity=3, unit_price=.35, placed_on=date(2024, 10, 11)),
+        Receipt(order_id=2, customer_id=1, customer_name='Daniel', item_id=2, item_name='Pen', item_quantity=2, unit_price=2.45, placed_on=date(2024, 10, 11))
     ]

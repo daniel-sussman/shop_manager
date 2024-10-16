@@ -30,3 +30,7 @@ class ItemRepository:
         self._connection.execute(
             'DELETE FROM items WHERE id = %s', [item_id])
         return None
+
+    def update_quantity_stocked(self, item_id, new_value):
+        self._connection.execute(
+            'UPDATE items SET quantity_stocked = %s WHERE items.id = %s', [new_value, item_id])

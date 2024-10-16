@@ -5,7 +5,7 @@ class Order:
         self.id = id
         self.item_id = item_id
         self.customer_id = customer_id
-        self.item_quantity = item_quantity
+        self.item_quantity = int(item_quantity)
         self.placed_on = placed_on
 
     # This method allows our tests to assert that the objects it expects

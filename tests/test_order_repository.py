@@ -1,5 +1,6 @@
 from lib.order_repository import OrderRepository
 from lib.order import Order
+from lib.item_repository import ItemRepository
 from datetime import date
 
 """
@@ -80,3 +81,15 @@ def test_delete_record(db_connection):
         Order(8, 4, 6, 10, date(2024, 10, 13)),
         Order(9, 1, 3, 4, date(2024, 10, 13)),
     ]
+
+def test_ordering_an_item_removes_it_from_stock(db_connection):
+    db_connection.seed("seeds/shop_manager.sql")
+    order_repository = OrderRepository(db_connection)
+    item_repository = ItemRepository(db_connection)
+
+    item_id = 4
+    initial_qty = item_repository.find(item_id).quantity_stocked
+    qty_ordered = 17
+    order_repository.create(Order(None, item_id, 3, qty_ordered, date(2024, 10, 15)))
+    final_qty = item_repository.find(item_id).quantity_stocked
+    assert final_qty == initial_qty - qty_ordered
