@@ -101,7 +101,7 @@ def list_customers(io):
 def list_orders(io):
     io.expect_print(ADMIN_OPTIONS)
     io.provide("5")
-    io.expect_print(LIST_ORDERS_ADMIN)
+    io.expect_print(LIST_ORDERS)
     io.expect_print(RECEIPT_HEADER_3 + '\n' + RECEIPT_HEADER_4 + "\n" \
         "     1    |   Daniel   |  11 Oct 2024   |   1    |     Pencil     |     3 @ £0.35      |    £1.05\n" \
         "     2    |   Daniel   |  11 Oct 2024   |   2    |      Pen       |     2 @ £2.45      |    £4.90\n" \
@@ -118,11 +118,13 @@ def list_orders_by_customer(io):
     io.expect_print(ADMIN_OPTIONS)
     io.provide("6")
     io.expect_print(LIST_CUSTOMERS)
+    io.expect_print("  1 - Daniel\n  2 - Alessandro\n  3 - Alfie\n  4 - Jess\n  5 - Adam\n  6 - Taha\n  7 - Valeria\n  8 - Johannes\n")
     io.expect_print(PROMPT_CUSTOMER_ID)
     io.provide("3")
-    io.expect_print(RECEIPT_HEADER_3 + '\n' + RECEIPT_HEADER_4 + "\n" \
-        "     4    |   Alfie    |  12 Oct 2024   |   2    |      Pen       |     3 @ £2.45      |    £7.35\n" \
-        "     9    |   Alfie    |  13 Oct 2024   |   1    |     Pencil     |     4 @ £0.35      |    £1.40\n"
+    io.expect_print(LIST_ORDERS)
+    io.expect_print(RECEIPT_HEADER_1 + '\n' + RECEIPT_HEADER_2 + "\n" \
+        "     9    |  13 Oct 2024   |   1    |     Pencil     |     4 @ £0.35      |    £1.40\n" \
+        "     4    |  12 Oct 2024   |   2    |      Pen       |     3 @ £2.45      |    £7.35\n"
     )
 
 def delete_customer_account(io):

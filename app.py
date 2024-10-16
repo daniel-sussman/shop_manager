@@ -59,7 +59,7 @@ class Application():
                 elif response == "5":
                     self._list_all_orders()
                 elif response == "6":
-                    pass # view orders by customer
+                    self._get_orders_by_customer()
                 else:
                     self._invalid_response()
             except ExitProgram:
@@ -72,7 +72,7 @@ class Application():
                 if response == "1":
                     self._list_all_items()
                 elif response == "2":
-                    self._list_my_orders()
+                    self._list_my_orders(self.user.id)
                 elif response == "3":
                     self._place_new_order()
                 elif response == "4":
@@ -119,12 +119,6 @@ class Application():
             self._show(WELCOME_BACK(customer.name))
             return customer
         self._invalid_response()
-
-    def _prompt_for_customer(self, customers):
-        for customer in customers:
-            self._show(f"  {customer.id} - {customer.name}")
-
-        return self._prompt("Select a customer:")
     
     def _login_admin(self):
         self._show(WELCOME_ADMIN)
@@ -139,17 +133,13 @@ class Application():
         self._show(LIST_CUSTOMERS)
         self._show('\n'.join([f"  {customer.id} - {customer.name}" for customer in customers]) + '\n')
 
-    def _list_items_by_customer(self, customer_name):
-        items = [Item(item.id, item.title) for item in self._item_repository.find_by_customer(customer_name)]
-        self._show_items(items)
-
-    def _list_my_orders(self):
-        receipts = self._customer_repository.get_receipts(self.user.id)
+    def _list_my_orders(self, customer_id):
+        receipts = self._customer_repository.get_receipts(customer_id)
         receipt_header = [
             RECEIPT_HEADER_1,
             RECEIPT_HEADER_2
         ]
-        self._show_orders(LIST_ORDERS, receipt_header, receipts)
+        self._show_orders(receipt_header, receipts)
 
     def _list_all_orders(self):
         receipts = self._order_repository.get_receipts()
@@ -157,27 +147,17 @@ class Application():
             RECEIPT_HEADER_3,
             RECEIPT_HEADER_4
         ]
-        self._show_orders(LIST_ORDERS_ADMIN, receipt_header, receipts)
+        self._show_orders(receipt_header, receipts)
     
-    def _show_orders(self, preface, receipt_header, receipts):
-        rows = receipt_header + receipts
-        self._show(preface)
-        self._show('\n'.join([str(row) for row in rows]) + '\n')
+    def _get_orders_by_customer(self):
+        self._list_all_customers()
+        customer_id = self._prompt(PROMPT_CUSTOMER_ID)
+        self._list_my_orders(customer_id)
 
-    def _add_item(self):
-        name = self._prompt(PROMPT_NEW_ITEM_DESCRIPTION)
-        unit_price = self._prompt(PROMPT_NEW_ITEM_UNIT_PRICE)
-        quantity = self._prompt(PROMPT_NEW_ITEM_QUANTITY)
-        item = Item(None, name, unit_price, quantity)
-        self._item_repository.create(item)
-        self._show(ITEM_ADDED_TO_SHOP)
-    
-    def _restock_item(self):
-        self._list_all_items()
-        item_id = self._prompt(PROMPT_RESTOCK_ITEM)
-        qty = self._prompt(PROMPT_NEW_ITEM_QUANTITY)
-        self._item_repository.update_quantity_stocked(item_id, qty)
-        self._show(RESTOCK_CONFIRMATION)
+    def _show_orders(self, receipt_header, receipts):
+        rows = receipt_header + receipts
+        self._show(LIST_ORDERS)
+        self._show('\n'.join([str(row) for row in rows]) + '\n')
 
     def _place_new_order(self):
         self._list_all_items()
@@ -191,6 +171,30 @@ class Application():
         else:
             self._show(ORDER_UNSUCCESSFUL)
 
+    def _show_items(self, items):
+        items_in_stock = [item for item in items if item.quantity_stocked > 0]
+        if not any(items_in_stock):
+            self._show(SOLD_OUT)
+
+        show_qty = type(self.user) == Admin
+        self._show(LIST_ITEMS)
+        self._show('\n'.join([f"  {item.id} - {item.name :.<20} £{item.unit_price:.2f}{f'{item.quantity_stocked} in stock':>16}" if show_qty else f"  {item.id} - {item.name :.<20} £{item.unit_price:.2f}" for item in items_in_stock]) + '\n')
+
+    def _add_item(self):
+        name = self._prompt(PROMPT_NEW_ITEM_DESCRIPTION)
+        unit_price = self._prompt(PROMPT_NEW_ITEM_UNIT_PRICE)
+        quantity = self._prompt(PROMPT_NEW_ITEM_QUANTITY)
+        item = Item(None, name, unit_price, quantity)
+        self._item_repository.create(item)
+        self._show(ITEM_ADDED_TO_SHOP)
+
+    def _restock_item(self):
+        self._list_all_items()
+        item_id = self._prompt(PROMPT_RESTOCK_ITEM)
+        qty = self._prompt(PROMPT_NEW_ITEM_QUANTITY)
+        self._item_repository.update_quantity_stocked(item_id, qty)
+        self._show(RESTOCK_CONFIRMATION)
+
     def _show(self, message):
         self.io.write(message + "\n")
 
@@ -201,15 +205,6 @@ class Application():
             raise ExitProgram
         else:
             return return_type(response)
-
-    def _show_items(self, items):
-        items_in_stock = [item for item in items if item.quantity_stocked > 0]
-        if not any(items_in_stock):
-            self._show(SOLD_OUT)
-
-        show_qty = type(self.user) == Admin
-        self._show(LIST_ITEMS)
-        self._show('\n'.join([f"  {item.id} - {item.name :.<20} £{item.unit_price:.2f}{f'{item.quantity_stocked} in stock':>16}" if show_qty else f"  {item.id} - {item.name :.<20} £{item.unit_price:.2f}" for item in items_in_stock]) + '\n')
 
     def _invalid_response(self):
         self._show(INVALID_RESPONSE)
